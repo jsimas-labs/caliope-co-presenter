@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mãos livres — apresentação de teste</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  :root { --red: #ee0000; --bg: #0b0b0d; --card: #16161a; --line: #2a2a31; --text: #f4f4f5; --muted: #a1a1aa; }
+  html, body { height: 100%; background: var(--bg); color: var(--text); font-family: Inter, system-ui, sans-serif; overflow: hidden; }
+  .slide { position: absolute; inset: 0; padding: 9vh 9vw; display: flex; flex-direction: column; justify-content: center;
+           opacity: 0; transform: translateX(4vw); transition: opacity .5s, transform .5s; pointer-events: none; }
+  .slide.active { opacity: 1; transform: none; pointer-events: auto; }
+  .slide.before { transform: translateX(-4vw); }
+  .kicker { color: var(--red); font-weight: 700; letter-spacing: .14em; text-transform: uppercase; font-size: 1.6vw; margin-bottom: 2.5vh; }
+  h1 { font-size: 6vw; line-height: 1.02; font-weight: 800; letter-spacing: -.02em; max-width: 18ch; }
+  h2 { font-size: 4vw; line-height: 1.08; font-weight: 800; letter-spacing: -.02em; margin-bottom: 5vh; max-width: 22ch; }
+  .lead { font-size: 2.1vw; color: var(--muted); margin-top: 4vh; max-width: 40ch; line-height: 1.35; }
+  ul.points { list-style: none; display: grid; gap: 3vh; font-size: 2.3vw; max-width: 40ch; }
+  ul.points li { padding-left: 2.2vw; position: relative; line-height: 1.3; }
+  ul.points li::before { content: ''; position: absolute; left: 0; top: .55em; width: .9vw; height: .9vw; border-radius: 50%; background: var(--red); }
+  .flow { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.6vw; }
+  .step { background: var(--card); border: 1px solid var(--line); border-radius: 1vw; padding: 3vh 1.6vw; }
+  .step b { display: block; font-size: 2.3vw; margin-bottom: 1.2vh; }
+  .step span { color: var(--muted); font-size: 1.45vw; line-height: 1.35; }
+  .step .n { color: var(--red); font-weight: 800; font-size: 1.3vw; margin-bottom: 1.5vh; display: block; }
+  .live { display: inline-flex; align-items: center; gap: .8vw; font-size: 1.5vw; color: var(--muted); margin-top: 5vh; }
+  .live i { width: 1vw; height: 1vw; border-radius: 50%; background: var(--red); animation: pulse 1.4s infinite; }
+  @keyframes pulse { 50% { opacity: .25; } }
+  .notes { display: none; }
+  .chrome { position: fixed; left: 9vw; right: 9vw; bottom: 4vh; display: flex; justify-content: space-between; align-items: center;
+            color: var(--muted); font-size: 1.1vw; letter-spacing: .08em; }
+  .chrome b { color: var(--text); }
+  .bar { position: fixed; left: 0; top: 0; height: 4px; background: var(--red); transition: width .4s; }
+</style>
+</head>
+<body>
+
+<section class="slide">
+  <div class="kicker">Apresentação de teste · 5 minutos</div>
+  <h1>Apresentar sem tocar no teclado</h1>
+  <p class="lead">Uma co-apresentadora de IA que ouve, fala com a plateia e opera a demo ao vivo.</p>
+  <aside class="notes">Abertura. O Jonathan apresenta a ideia: hoje ele não vai tocar no teclado. A assistente se chama Calíope e,
+    quando chamada, se apresenta em uma frase: ela ouve, troca os slides e opera a demonstração como um usuário.</aside>
+</section>
+
+<section class="slide">
+  <div class="kicker">O problema</div>
+  <h2>Apresentar e operar a demo ao mesmo tempo divide a atenção</h2>
+  <ul class="points">
+    <li>Trocar de janela quebra o ritmo da história</li>
+    <li>Digitar sob pressão gera erro ao vivo</li>
+    <li>Quem apresenta para de olhar para a plateia</li>
+  </ul>
+  <aside class="notes">Dor que todo apresentador técnico conhece: a demo rouba a atenção. Três sintomas: troca de janela,
+    erro de digitação ao vivo e perda de contato com a plateia.</aside>
+</section>
+
+<section class="slide">
+  <div class="kicker">Como funciona</div>
+  <h2>Ouve, decide, age e fala</h2>
+  <div class="flow">
+    <div class="step"><span class="n">01</span><b>Ouve</b><span>A voz vai para um modelo de voz em tempo real, que só responde quando ouve o nome dela.</span></div>
+    <div class="step"><span class="n">02</span><b>Decide</b><span>O modelo escolhe uma ferramenta: trocar slide, abrir página, clicar, preencher.</span></div>
+    <div class="step"><span class="n">03</span><b>Age</b><span>O Playwright move o cursor e digita no navegador, como um usuário real.</span></div>
+    <div class="step"><span class="n">04</span><b>Fala</b><span>A voz dela entra no Meet como um segundo microfone.</span></div>
+  </div>
+  <aside class="notes">Arquitetura em quatro passos. Ouve: áudio contínuo para a API de voz em tempo real, com o nome da assistente
+    funcionando como palavra de ativação. Decide: chamada de ferramentas (function calling). Age: Playwright controla a janela
+    do palco, com um cursor visível. Fala: a voz sai por um dispositivo de áudio virtual que o Meet usa como microfone.</aside>
+</section>
+
+<section class="slide">
+  <div class="kicker">Demo ao vivo</div>
+  <h2>A Calíope vai abrir uma conta no Banco Demo, como uma cliente faria</h2>
+  <p class="lead">Ninguém toca no teclado: ela preenche o cadastro, aceita os termos e envia.</p>
+  <div class="live"><i></i> peça: "Calíope, abre a conta da Maria Oliveira"</div>
+  <aside class="notes">Demonstração. A Calíope abre o Banco Demo, preenche nome, e-mail, renda e produto, aceita os termos e clica em
+    Abrir conta. Depois lê o número do protocolo para a plateia. O Banco Demo é uma página de teste, sem dados reais.</aside>
+</section>
+
+<section class="slide">
+  <div class="kicker">Encerramento</div>
+  <h1>Perguntas?</h1>
+  <p class="lead">Experimente: "Calíope, resume o que vimos em duas frases."</p>
+  <aside class="notes">Fechamento. Resumo: a apresentação inteira foi conduzida por voz, com slides e demo operados pela assistente.
+    Ela pode responder perguntas da plateia usando o conteúdo destes slides.</aside>
+</section>
+
+<div class="bar" id="bar"></div>
+<div class="chrome"><span>MÃOS <b>LIVRES</b></span><span id="counter"></span></div>
+
+<script>
+(() => {
+  const slides = [...document.querySelectorAll('.slide')];
+  let cur = Math.max(0, Math.min(slides.length - 1, Number(location.hash.slice(1)) - 1 || 0));
+  function render() {
+    slides.forEach((s, k) => { s.classList.toggle('active', k === cur); s.classList.toggle('before', k < cur); });
+    document.getElementById('counter').textContent = `${cur + 1} / ${slides.length}`;
+    document.getElementById('bar').style.width = `${(cur + 1) / slides.length * 100}%`;
+    history.replaceState(null, '', `#${cur + 1}`);
+  }
+  const go = k => { if (k >= 0 && k < slides.length) { cur = k; render(); } };
+  addEventListener('keydown', e => {
+    if (['ArrowRight', ' ', 'PageDown'].includes(e.key)) { e.preventDefault(); go(cur + 1); }
+    else if (['ArrowLeft', 'PageUp'].includes(e.key)) { e.preventDefault(); go(cur - 1); }
+    else if (e.key === 'Home') go(0);
+    else if (e.key === 'End') go(slides.length - 1);
+  });
+  // o que o co-piloto lê a cada troca: número, título e notas do slide
+  window.deck = {
+    go,
+    state: () => {
+      const s = slides[cur], h = s.querySelector('h1, h2'), n = s.querySelector('.notes');
+      return { numero: cur + 1, total: slides.length, titulo: h.textContent.trim(), notas: n ? n.textContent.trim().replace(/\s+/g, ' ') : '' };
+    },
+  };
+  addEventListener('hashchange', () => go(Number(location.hash.slice(1)) - 1));
+  render();
+})();
+</script>
+</body>
+</html>

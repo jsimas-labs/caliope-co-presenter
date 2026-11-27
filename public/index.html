@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Co-piloto de voz</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  :root { --bg: #0e0f12; --card: #17181d; --line: #2a2c33; --text: #ececf1; --muted: #9a9cab; --red: #ee0000; --ok: #22c55e; --warn: #f59e0b; }
+  body { font: 14px/1.45 Inter, system-ui, sans-serif; background: var(--bg); color: var(--text); padding: 20px; max-width: 980px; margin: 0 auto; }
+  h1 { font-size: 20px; display: flex; align-items: center; gap: 10px; }
+  .pill { font-size: 12px; font-weight: 600; padding: 3px 10px; border-radius: 99px; background: #2a2c33; color: var(--muted); }
+  .pill.on { background: rgba(34,197,94,.15); color: var(--ok); }
+  .pill.wait { background: rgba(245,158,11,.15); color: var(--warn); }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 16px; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; }
+  .card h3 { font-size: 12px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); margin-bottom: 10px; }
+  .row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-bottom: 8px; }
+  button { font: inherit; font-weight: 600; padding: 8px 12px; border-radius: 8px; border: 1px solid var(--line); background: #22242b; color: var(--text); cursor: pointer; }
+  button.primary { background: var(--red); border-color: var(--red); }
+  button:disabled { opacity: .45; cursor: default; }
+  select, input[type=text] { font: inherit; padding: 7px 9px; border-radius: 8px; border: 1px solid var(--line); background: #0e0f12; color: var(--text); min-width: 0; flex: 1; }
+  label.opt { display: flex; gap: 6px; align-items: center; color: var(--muted); }
+  .slide b { display: block; font-size: 16px; margin-bottom: 4px; }
+  .slide p { color: var(--muted); font-size: 13px; }
+  #log { grid-column: 1 / -1; height: 300px; overflow: auto; font-size: 13px; }
+  #log div { padding: 4px 0; border-bottom: 1px solid #1f2127; }
+  #log .who { display: inline-block; min-width: 64px; font-weight: 700; color: var(--muted); }
+  #log .voce .who { color: #60a5fa; } #log .caliope .who { color: #f472b6; } #log .acao .who { color: var(--ok); } #log .erro .who { color: var(--red); }
+  #log .ignored { opacity: .5; }
+  form { grid-column: 1 / -1; display: flex; gap: 8px; }
+  .hint { color: var(--muted); font-size: 12px; margin-top: 6px; }
+  .mood { margin-top: 16px; display: flex; align-items: center; gap: 16px; padding: 16px 20px; border-radius: 14px; border: 2px solid var(--line); background: var(--card); transition: all .3s; }
+  .mood i { width: 22px; height: 22px; border-radius: 50%; background: #3f414a; flex: none; }
+  .mood b { display: block; font-size: 26px; line-height: 1.1; }
+  .mood span { color: var(--muted); font-size: 14px; }
+  .mood.acordada { border-color: var(--ok); background: rgba(34,197,94,.08); }
+  .mood.acordada i { background: var(--ok); box-shadow: 0 0 0 0 rgba(34,197,94,.6); animation: ping 1.4s infinite; }
+  .mood.dormindo { border-color: #4b5563; }
+  .mood.dormindo i { background: #6b7280; }
+  .mood.dormindo b::after { content: ' 💤'; }
+  @keyframes ping { 70% { box-shadow: 0 0 0 12px rgba(34,197,94,0); } 100% { box-shadow: 0 0 0 0 rgba(34,197,94,0); } }
+  #meter { height: 6px; border-radius: 3px; background: #22242b; overflow: hidden; flex: 1; }
+  #meter i { display: block; height: 100%; width: 0; background: var(--ok); transition: width .08s; }
+</style>
+</head>
+<body>
+<h1>Co-piloto de voz <span class="pill" id="status">desconectado</span></h1>
+
+<div class="mood off" id="mood"><i></i><div><b>Desligada</b><span>conecte a voz para começar</span></div></div>
+
+<div class="grid">
+  <div class="card">
+    <h3>1 · Palco</h3>
+    <div class="row">
+      <button id="btnStage" class="primary">Abrir janela do palco</button>
+    </div>
+    <p class="hint">Abre slides e demo num navegador controlado. Compartilhe essa janela no Meet.</p>
+    <div class="slide" style="margin-top:12px"><b id="slideTitle">—</b><p id="slideInfo">Slide atual aparece aqui.</p></div>
+  </div>
+
+  <div class="card">
+    <h3>2 · Voz</h3>
+    <div class="row">
+      <button id="btnVoice" class="primary">Conectar voz (OpenAI)</button>
+      <button id="btnB">Plano B: voz do navegador</button>
+      <button id="btnHush" title="Esc">Silenciar (Esc)</button>
+      <button id="btnStop" disabled>Desconectar</button>
+    </div>
+    <div class="row"><span style="color:var(--muted);width:72px">Microfone</span><select id="micSel"></select></div>
+    <div class="row"><span style="color:var(--muted);width:72px">Saída</span><select id="outSel"></select></div>
+    <div class="row"><span style="color:var(--muted);width:72px">Voz</span><select id="vozSel" title="voz da Calíope: as pt-BR do macOS, ou a da OpenAI (sotaque americano)"></select><button id="vozTeste" type="button">ouvir</button></div>
+    <div class="row"><span style="color:var(--muted);width:72px">Nível</span><div id="meter"><i></i></div></div>
+    <div class="row">
+      <label class="opt"><input type="checkbox" id="monitor" checked> ouvir no fone também</label>
+      <label class="opt"><input type="checkbox" id="openMode"> sempre atenta</label>
+      <label class="opt"><input type="checkbox" id="stageBadge" checked> selo no palco</label>
+      <label class="opt" title="barras animadas sobre os slides enquanto ela fala"><input type="checkbox" id="espectro" checked> espectro no palco</label>
+      <button id="espectroTeste" type="button" title="acende as barras por 3 s no palco e aqui">testar barras</button>
+      <label class="opt"><input type="checkbox" id="bargeIn" checked> para quando eu falo</label>
+      <label class="opt" title="Comandos diretos e 'ok' reconhecidos pelo Chrome, sem esperar a OpenAI"><input type="checkbox" id="fastEar" checked> ouvido rápido</label>
+      <label class="opt"><input type="checkbox" id="muted"> mudo</label>
+    </div>
+    <div class="row"><span style="color:var(--muted);width:72px">Ativação</span><input type="text" id="wake" value="calíope, caliope, calliope, kalíope, kaliope, calíopi, caliopi, cali, kali, cáli">
+      <span style="color:var(--muted)">acordada por</span><input type="number" id="windowSec" value="30" min="5" max="300" style="width:64px;flex:none"> s</div>
+    <p class="hint">Saída = BlackHole para o Meet. Comandos diretos ("próximo slide", "volta", "slide 3") funcionam sem o nome.
+      Depois de falar com ela, fica acordada pelo tempo acima e decide sozinha se a fala é para ela.</p>
+  </div>
+
+  <div class="card" id="log"></div>
+
+  <form id="cmd">
+    <input type="text" id="cmdText" placeholder='Digite um pedido, ex.: "próximo slide" ou "abre a conta da Maria"' autocomplete="off">
+    <button type="submit">Enviar</button>
+  </form>
+</div>
+
+<audio id="audioOut" autoplay></audio>
+<audio id="audioMon" autoplay></audio>
+<script src="espectro.js"></script>
+<script src="copiloto.js"></script>
+</body>
+</html>

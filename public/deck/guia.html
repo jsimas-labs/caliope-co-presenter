@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="pt-BR"><head><meta charset="utf-8"><title>Explicação guiada (teste)</title></head>
+<body>
+<!-- deck de teste da explicação guiada (test/guia.mjs): 8 passos, os passos 4, 5 e 8 sem fala -->
+<section data-fala-intro="Vou explicar o Agent Card em oito passos.">
+  <h2>Anatomia de um Agent Card</h2>
+  <div class="frag" data-fala="Primeiro passo. O nome do agente e a versão aparecem no topo do cartão, e servem para qualquer outro agente saber exatamente com quem está falando, sem adivinhar nada.">nome</div>
+  <div class="frag" data-fala="Segundo passo. A descrição diz em linguagem natural o que o agente faz, e é ela que o orquestrador lê para decidir se vale a pena chamar esse agente ou outro.">descrição</div>
+  <div class="frag" data-fala="Terceiro passo. As habilidades listam cada tarefa com entrada e saída, como um contrato.">habilidades</div>
+  <div class="frag">endpoint</div>
+  <div class="frag">autenticação</div>
+  <div class="frag" data-fala="Sexto passo. As capacidades dizem se o agente faz streaming, notificações e tarefas longas.">capacidades</div>
+  <div class="frag" data-fala="Sétimo passo. A extensão traz o que é específico do banco: limites de crédito, regras de compliance e o ponto onde o humano precisa dizer sim antes de qualquer contratação, porque o sim é sempre do humano e nunca da máquina, por mais confiável que ela pareça no palco.">extensão</div>
+  <div class="frag">resumo</div>
+</section>
+<script>
+  const sec = document.querySelector('section'), frags = [...sec.querySelectorAll('.frag')];
+  let at = 0;
+  addEventListener('keydown', e => { if (e.key === 'ArrowRight') { at = Math.min(at + 1, frags.length); sec.dataset.at = at; } });
+  window.deck = {
+    state: () => ({ numero: 1, total: 1, titulo: 'Anatomia de um Agent Card', notas: '', passo: at }),
+    guia: () => { at = 0; sec.dataset.at = 0; return { intro: sec.dataset.falaIntro, partes: frags.map(f => f.dataset.fala || '') }; },
+  };
+</script>
+</body></html>
