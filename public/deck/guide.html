@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>Guided explanation (test)</title></head>
+<body>
+<!-- test deck for the guided explanation (test/guide.mjs): 8 steps, steps 4, 5 and 8 have no line.
+     It follows the deck contract of the real deck: window.deck.guia(next) returns { intro, parts } and → reveals one step. -->
+<section data-say-intro="I will explain the Agent Card in eight steps.">
+  <h2>Anatomy of an Agent Card</h2>
+  <div class="frag" data-say="Step one. The agent's name and version sit at the top of the card, so any other agent knows exactly who it is talking to, without guessing anything.">name</div>
+  <div class="frag" data-say="Step two. The description says in plain language what the agent does, and it is what the orchestrator reads to decide whether to call this agent or another one.">description</div>
+  <div class="frag" data-say="Step three. The skills list each task with its input and output, like a contract.">skills</div>
+  <div class="frag">endpoint</div>
+  <div class="frag">authentication</div>
+  <div class="frag" data-say="Step six. The capabilities say whether the agent does streaming, notifications and long-running tasks.">capabilities</div>
+  <div class="frag" data-say="Step seven. The extension carries what is specific to the bank: credit limits, compliance rules and the point where a human has to say yes before any contract, because the yes always belongs to the human and never to the machine, however trustworthy it looks on stage.">extension</div>
+  <div class="frag">summary</div>
+</section>
+<script>
+  const sec = document.querySelector('section'), frags = [...sec.querySelectorAll('.frag')];
+  let at = 0;
+  addEventListener('keydown', e => { if (e.key === 'ArrowRight') { at = Math.min(at + 1, frags.length); sec.dataset.at = at; } });
+  window.deck = {
+    state: () => ({ number: 1, total: 1, title: 'Anatomy of an Agent Card', notes: '', step: at }),
+    guia: () => { at = 0; sec.dataset.at = 0; return { intro: sec.dataset.sayIntro, parts: frags.map(f => f.dataset.say || '') }; },
+  };
+</script>
+</body></html>

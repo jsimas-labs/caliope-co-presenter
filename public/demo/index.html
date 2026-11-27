@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Banco Demo — abra sua conta</title>
+<title>Demo Bank — open your account</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
@@ -41,36 +41,36 @@
 </style>
 </head>
 <body>
-<header><div class="logo">B</div><b>Banco Demo</b><span>Página de teste · sem dados reais</span></header>
+<header><div class="logo">B</div><b>Demo Bank</b><span>Test page · no real data</span></header>
 <main>
   <section class="pitch">
-    <h1>Sua conta digital em 2 minutos</h1>
-    <p>Sem tarifa de manutenção, com cartão sem anuidade e Pix ilimitado.</p>
-    <ul><li>Abertura 100% online</li><li>Cartão com cashback</li><li>Atendimento 24 horas</li></ul>
+    <h1>Your digital account in 2 minutes</h1>
+    <p>No maintenance fee, a card with no annual fee and unlimited instant transfers.</p>
+    <ul><li>100% online opening</li><li>Card with cashback</li><li>24-hour support</li></ul>
   </section>
   <section class="card">
     <form id="form" novalidate>
-      <h2>Abra sua conta</h2>
-      <label for="nome">Nome completo</label>
-      <input id="nome" type="text" autocomplete="off" placeholder="Como no seu documento">
-      <label for="email">E-mail</label>
-      <input id="email" type="email" autocomplete="off" placeholder="voce@exemplo.com">
-      <label for="renda">Renda mensal (R$)</label>
-      <input id="renda" type="number" min="0" placeholder="0">
-      <label for="produto">Produto</label>
-      <select id="produto">
-        <option value="">Escolha um produto</option>
-        <option>Conta digital</option>
-        <option>Conta digital + cartão</option>
-        <option>Conta PJ</option>
+      <h2>Open your account</h2>
+      <label for="name">Full name</label>
+      <input id="name" type="text" autocomplete="off" placeholder="As on your ID">
+      <label for="email">Email</label>
+      <input id="email" type="email" autocomplete="off" placeholder="you@example.com">
+      <label for="income">Monthly income ($)</label>
+      <input id="income" type="number" min="0" placeholder="0">
+      <label for="product">Product</label>
+      <select id="product">
+        <option value="">Choose a product</option>
+        <option>Digital account</option>
+        <option>Digital account + card</option>
+        <option>Business account</option>
       </select>
-      <div class="check"><input id="termos" type="checkbox"><label for="termos">Li e aceito os termos</label></div>
-      <button id="enviar" type="submit">Abrir conta</button>
-      <div class="err" id="erro"></div>
+      <div class="check"><input id="terms" type="checkbox"><label for="terms">I have read and accept the terms</label></div>
+      <button id="submit" type="submit">Open account</button>
+      <div class="err" id="error"></div>
     </form>
-    <div class="done" id="resultado" data-testid="resultado" hidden>
+    <div class="done" id="result" data-testid="result" hidden>
       <div class="tick">✓</div>
-      <h2>Conta aberta!</h2>
+      <h2>Account open!</h2>
       <p id="msg"></p>
       <div class="proto" id="proto"></div>
     </div>
@@ -80,19 +80,19 @@
 const $ = id => document.getElementById(id);
 $('form').addEventListener('submit', e => {
   e.preventDefault();
-  const nome = $('nome').value.trim(), email = $('email').value.trim();
-  const erro = !nome ? 'Informe o nome completo.' : !/^\S+@\S+\.\S+$/.test(email) ? 'Informe um e-mail válido.'
-    : !$('produto').value ? 'Escolha um produto.' : !$('termos').checked ? 'É preciso aceitar os termos.' : '';
-  $('erro').textContent = erro;
-  if (erro) return;
-  $('enviar').disabled = true;
-  $('enviar').textContent = 'Analisando cadastro...';
+  const name = $('name').value.trim(), email = $('email').value.trim();
+  const error = !name ? 'Enter your full name.' : !/^\S+@\S+\.\S+$/.test(email) ? 'Enter a valid email.'
+    : !$('product').value ? 'Choose a product.' : !$('terms').checked ? 'You need to accept the terms.' : '';
+  $('error').textContent = error;
+  if (error) return;
+  $('submit').disabled = true;
+  $('submit').textContent = 'Reviewing your details...';
   setTimeout(() => {
-    const proto = 'BD-' + String(Date.now()).slice(-6);
+    const ref = 'DB-' + String(Date.now()).slice(-6);
     $('form').hidden = true;
-    $('msg').textContent = `Tudo pronto, ${nome.split(' ')[0]}! A ${$('produto').value.toLowerCase()} foi aberta e os detalhes foram enviados para ${email}.`;
-    $('proto').textContent = `Protocolo ${proto}`;
-    $('resultado').hidden = false;
+    $('msg').textContent = `All set, ${name.split(' ')[0]}! Your ${$('product').value.toLowerCase()} is open and the details were sent to ${email}.`;
+    $('proto').textContent = `Reference ${ref}`;
+    $('result').hidden = false;
   }, 1400);
 });
 </script>
