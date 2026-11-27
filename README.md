@@ -1,123 +1,138 @@
-# Co-piloto de voz
+# Calíope co-presenter
 
-Uma co-apresentadora de IA (a **Calíope**) para apresentações ao vivo no Google Meet. Ela fica ouvindo, responde quando é
-chamada pelo nome, troca os slides e opera uma página web como um usuário: o cursor anda até o campo, clica e digita
-letra por letra. A voz dela entra no Meet, então os participantes ouvem.
+An AI co-presenter (**Calíope**) for live talks on Google Meet. She keeps listening, answers when called by name,
+changes slides and runs a web page like a user: the cursor moves to the field, clicks and types key by key.
+Her voice goes into Meet, so participants hear her.
 
-Este projeto traz uma **apresentação de teste de 5 minutos** (5 slides + uma demo do "Banco Demo") para servir de base
-às apresentações reais.
+She speaks the talk's language (`LANGUAGE`, default `pt-BR`) and switches if you talk to her in another one.
+Voice commands work in Portuguese and English.
 
-## Como funciona
+The repo ships a **5-minute test presentation** (5 slides + a "Demo Bank" demo) as a base for real talks.
+
+## How it works
 
 ```
-microfone ─► co-piloto (Chrome) ◄─WebRTC─► OpenAI Realtime (voz + ferramentas)
-                    │
-                    └─HTTP─► servidor local ─► Playwright ─► janela do palco (slides + demo) ─► compartilhada no Meet
-voz da Calíope ─► BlackHole ─► microfone agregado do Meet
+mic ─► copilot (Chrome) ◄─WebRTC─► OpenAI Realtime (voice + tools)
+              │
+              └─HTTP─► local server ─► Playwright ─► stage window (slides + demo) ─► shared in Meet
+Calíope's voice ─► BlackHole ─► Meet's aggregate microphone
 ```
 
-- `agent.mjs`: personalidade, regras e ferramentas da assistente.
-- `stage.mjs`: a janela do palco (Playwright). Slides por teclado, demo por cursor e digitação, roteiros prontos.
-- `server.mjs`: serve as páginas, cria a sessão de voz (a chave fica no servidor) e executa as ferramentas.
-- `public/index.html` + `copiloto.js`: o painel do co-piloto, que você deixa aberto fora da tela compartilhada.
-- `public/deck/`: os 5 slides de teste. `public/demo/`: o Banco Demo.
+- `agent.mjs`: personality, language, rules and tools.
+- `stage.mjs`: the stage window (Playwright). Slides by keyboard, demo by cursor and typing, ready-made scripts.
+- `server.mjs`: serves the pages, creates the voice session (the key stays on the server) and runs the tools.
+- `public/index.html` + `copilot.js`: the copilot panel, which you keep open outside the shared screen.
+- `public/deck/`: the 5 test slides. `public/demo/`: the Demo Bank.
 
-## Como falar com a Calíope
+## Talking to Calíope
 
-| Jeito | Exemplo | O que acontece |
+| Way | Example | What happens |
 | --- | --- | --- |
-| Comando direto, sem nome | "Próximo slide", "volta", "slide 3", "mostra os slides" | Executa na hora, sem passar pelo modelo e sem ela falar |
-| Pelo nome | "Calíope, abre a conta da Maria" | Ela responde e fica **acordada** |
-| Acordada | "E quanto tempo isso leva?" | Qualquer fala vai para o modelo, que decide se é para ela ou para a plateia |
+| Direct command, no name | "Next slide", "back", "slide 3", "show the slides", "próximo slide" | Runs at once, without the model and without her speaking |
+| By name | "Calíope, open an account for Maria" | She answers and stays **awake** |
+| Awake | "And how long does that take?" | Anything goes to the model, which decides whether it is for her or for the audience |
 
-Ela fica acordada por 30 segundos depois da última troca (ajustável no painel) e depois **dorme**: aí só o nome ou um
-comando direto a acordam. O painel mostra em destaque **Ouvindo** ou **Dormindo 💤**, com a contagem, e um selo
-discreto no canto da janela do palco mostra o mesmo para você e para a plateia (desmarque **selo no palco** para
-esconder). **Sempre atenta** deixa ela acordada o tempo todo.
+She stays awake for 30 seconds after the last exchange (adjustable in the panel) and then **sleeps**: only her name or a
+direct command wakes her. The panel shows **Listening** or **Asleep 💤** with the countdown, and a discreet badge on the
+stage window shows the same to you and the audience (uncheck **badge on stage** to hide it). **Always listening** keeps
+her awake all the time.
 
-Comandos diretos só valem quando a frase é curta e é só o comando: "No próximo slide vamos ver..." não troca o slide.
+Direct commands only count when the sentence is just the command: "In the next slide we will see..." does not change slides.
 
-**Ações são silenciosas:** quando você pede uma ação ("Calíope, abre a conta da Maria"), ela executa sem falar nada e
-volta a dormir até você chamá-la de novo. Ela só fala quando você faz uma pergunta ou pede uma explicação, ou quando
-uma ação falha. Por dentro, cada pedido vira primeiro uma resposta só de texto; se for uma ação, nada é dito.
+**Actions are silent:** when you ask for an action, she does it without saying anything and goes back to sleep until you
+call her. She only speaks for a question, an explanation or a failed action. Internally each request first becomes a
+text-only response; if it is an action, nothing is said.
 
-**O sim é do humano:** a Calíope nunca confirma, aprova nem autoriza nada na demo. "Calíope, confirma para mim?" recebe a
-recusa pronta, "Isso eu não posso. O sim é seu." (`RECUSA` no `.env` troca a frase), sem passar pelo modelo, e ela
-dorme. Se o modelo tentar clicar em Confirmar ou digitar "sim", o palco recusa a ferramenta. Detalhes em
-`docs/agentes-na-pratica.md`, seção 4.4.
+**The yes belongs to the human:** Calíope never confirms, approves or authorizes anything in the demo. "Calíope, confirm it
+for me?" gets the ready refusal (pt-BR: "Isso eu não posso. O sim é seu."; `REFUSAL` in `.env` replaces it), without the
+model, and she sleeps. If the model tries to click Confirm or type "yes", the stage refuses the tool. Details in
+`docs/agents-in-practice.md`, section 4.4.
 
-**Para cortar a Calíope:** comece a falar e ela para na hora. "Ok", "tá bom", "para", "chega", "obrigado, Calíope" ou
-"pode dormir" calam a Calíope e a colocam para dormir. No painel, **Silenciar (Esc)** faz o mesmo. A fala que a
-interrompeu só vira pedido se tiver o nome dela.
+**To cut Calíope off:** start talking and she stops at once. "Ok", "stop", "thanks, Calíope", "para", "chega" or
+"pode dormir" silence her and put her to sleep. In the panel, **Silence (Esc)** does the same. The utterance that
+interrupted her only becomes a request if it has her name. During a guided explanation only "Calíope, stop" / "para"
+or Esc stop it, and they stop the whole sequence.
 
-## Velocidade
+## Language
 
-- **Ouvido rápido** (ligado por padrão no painel): o reconhecimento de voz do próprio Chrome roda junto com a
-  OpenAI e executa comandos diretos e o "ok" assim que fecha a frase, sem esperar a transcrição. Ele usa o
-  microfone padrão do sistema, então deixe o seu microfone real como entrada padrão do Mac.
-- O registro do painel mostra, em milissegundos, quanto tempo passou desde que você parou de falar até a
-  transcrição, a ação e o começo da fala dela. Use isso para ver onde está a lentidão.
-- Ajustes no `.env`: `SILENCE_MS` (pausa que fecha a sua frase, padrão 300), `CURSOR_STEPS` (padrão 16) para
-  o cursor e `TYPE_WPM` (padrão 40, a média de uma pessoa) para a digitação na demo, com ritmo irregular.
+| Variable | Default | Effect |
+| --- | --- | --- |
+| `LANGUAGE` | `pt-BR` | talk language (BCP 47): her speech, the transcription, Chrome's recognition, the macOS voices and the fixed phrases. `auto` lets the transcription detect it |
+| `PRESENTER_NAME` | `Jonathan` | who presents |
+| `REFUSAL` | per language | the refusal sentence |
 
-## Instalar (Mac)
+Fixed phrases (refusal, failure, badge) exist for pt, en and es; other languages fall back to English. The prompts and
+the code are in English to save tokens; the talk can be in any language.
+
+## Speed
+
+- **Fast ear** (on by default): Chrome's own speech recognition runs next to OpenAI and runs direct commands and
+  "ok"/"stop" as soon as the sentence closes, without waiting for the transcript. It uses the system's default mic,
+  so keep your real mic as the Mac's default input.
+- The panel log shows, in milliseconds, the time from when you stopped talking to the transcript, the action and the
+  start of her speech.
+- `.env` knobs: `SILENCE_MS` (pause that closes your sentence, default 300), `CURSOR_STEPS` (default 16) and
+  `TYPE_WPM` (default 40, an average person) for typing in the demo, with an uneven rhythm.
+
+## Install (Mac)
 
 ```bash
-npm run setup            # instala o Playwright e o Chromium
-cp .env.example .env     # coloque a OPENAI_API_KEY
+npm run setup            # installs Playwright and Chromium
+cp .env.example .env     # put in OPENAI_API_KEY
 npm start                # http://localhost:8787
-npm test                 # teste automático, sem microfone e sem chave
+npm test                 # automatic test, no mic and no key
 ```
 
-Para a janela do palco usar o seu Google Chrome em vez do Chromium, defina `BROWSER_CHANNEL=chrome` no `.env`.
+To have the stage window use your Google Chrome instead of Chromium, set `BROWSER_CHANNEL=chrome` in `.env`.
 
-## Áudio no Meet (uma vez)
+## Audio in Meet (once)
 
-1. Instale o [BlackHole 2ch](https://existential.audio/blackhole/) (gratuito): `brew install --cask blackhole-2ch`.
-2. Abra **Configuração de Áudio MIDI** › **+** › **Criar Dispositivo Agregado**. Marque o seu microfone real e o
-   BlackHole 2ch. Renomeie para "Mic + Calíope".
-3. No Meet, escolha **Mic + Calíope** como microfone. Use fone de ouvido.
-4. No painel do co-piloto, escolha o seu microfone real em **Microfone** e **BlackHole 2ch** em **Saída**. Deixe
-   **ouvir no fone também** marcado para você ouvir a Calíope.
+1. Install [BlackHole 2ch](https://existential.audio/blackhole/) (free): `brew install --cask blackhole-2ch`.
+2. Open **Audio MIDI Setup** › **+** › **Create Aggregate Device**. Check your real mic and BlackHole 2ch.
+   Rename it "Mic + Calíope".
+3. In Meet, choose **Mic + Calíope** as the microphone. Use headphones.
+4. In the copilot panel, choose your real mic in **Mic** and **BlackHole 2ch** in **Output**. Keep
+   **also on headphones** checked to hear Calíope.
 
-O co-piloto escuta só o microfone real, então nunca ouve a própria voz. Desative a supressão de ruído do Meet se a
-voz da Calíope soar cortada.
+The copilot only listens to the real mic, so it never hears its own voice. Turn off Meet's noise suppression if
+Calíope's voice sounds choppy.
 
-## Roteiro da apresentação de teste (5 min)
+## Test presentation script (5 min)
 
-| Tempo | Slide | Você diz |
+| Time | Slide | You say |
 | --- | --- | --- |
-| 0:00 | 1 | Abertura. "Calíope, se apresenta para o pessoal." |
-| 0:45 | 2 | "Próximo slide." Você fala do problema. |
-| 1:45 | 3 | "Avança." "Calíope, explica em uma frase como você decide o que fazer." "E por que não erra o botão?" (ainda acordada) |
-| 2:45 | 4 | "Próximo." "Calíope, abre a conta da Maria Oliveira no Banco Demo." Ela narra e preenche. |
-| 4:00 | 5 | "Mostra os slides." "Slide 5." "Calíope, resume o que vimos em duas frases." |
+| 0:00 | 1 | Opening. "Calíope, introduce yourself." |
+| 0:45 | 2 | "Next slide." You talk about the problem. |
+| 1:45 | 3 | "Next." "Calíope, explain in one sentence how you decide what to do." "And why don't you miss the button?" (still awake) |
+| 2:45 | 4 | "Next." "Calíope, open an account for Maria Oliveira at the Demo Bank." She fills it in. |
+| 4:00 | 5 | "Show the slides." "Slide 5." "Calíope, sum up what we saw in two sentences." |
 
-Antes de começar: `npm start`, abra http://localhost:8787 no Chrome, clique **Abrir janela do palco**, compartilhe
-essa janela no Meet e clique **Conectar voz**.
+Before starting: `npm start`, open http://localhost:8787 in Chrome, click **Open stage window**, share that window in
+Meet and click **Connect voice**.
 
-## Plano B
+## Plan B
 
-- **Plano B: voz do navegador** usa o reconhecimento de voz do Chrome e comandos fixos ("próximo", "slide 3",
-  "abre a conta", "volta para os slides"), com a mesma regra de acordada e dormindo. Não custa nada, mas a voz é a do sistema e não passa pelo BlackHole.
-- A caixa de texto do painel aceita os mesmos pedidos.
-- O teclado continua funcionando na janela do palco.
-- Se a sessão de voz cair (as sessões têm duração máxima), o co-piloto reconecta sozinho e reenvia o slide atual.
+- **Plan B: browser voice** uses Chrome's speech recognition and fixed commands ("next", "slide 3", "open account",
+  "back to the slides", and the Portuguese ones), with the same awake/asleep rule. It is free, but the voice is the
+  system's and does not go through BlackHole.
+- The panel's text box takes the same requests.
+- The keyboard still works in the stage window.
+- If the voice session drops (sessions have a maximum length), the copilot reconnects by itself and resends the current slide.
 
-## Adaptar para uma apresentação real
+## Adapting to a real talk
 
-- **Outro deck:** `DECK_URL` no `.env`. Qualquer deck que aceite as setas funciona (por exemplo o do bbdw-2026). Se o
-  deck expuser `window.deck.state()` com título e notas, a Calíope recebe as notas a cada troca de slide.
-- **Outra demo:** `DEMO_URL`, ou peça "Calíope, abre a página ..." com o endereço. As ferramentas livres (`clicar`,
-  `preencher`, `selecionar`, `ler_tela`) acham elementos pelo rótulo ou texto visível.
-- **Roteiro confiável:** para a parte mais importante da demo, escreva uma função em `stage.mjs` como
-  `scriptOpenAccount` e registre o nome em `executar_roteiro` (`agent.mjs`). Pedidos livres são para improviso.
-- **Comandos `oc` e APIs:** ficam como uma nova ferramenta no servidor, com lista de comandos permitidos.
-- **Resultado de uma cena no slide:** outro programa desta máquina pode mandar `POST /api/stage/cena` com
-  `{id, titulo, onde, estado, linhas}`; se o deck expuser `window.deck.cena`, o resultado aparece por cima do slide
-  atual. É como a Mesa da demo mostra o 403 e o 429 do cluster (`docs/agentes-na-pratica.md`, seção 4.5).
+- **Another deck:** `DECK_URL` in `.env`. Any deck that takes arrow keys works. If the deck exposes
+  `window.deck.state()` with title and notes (`title`/`notes` or `titulo`/`notas`), Calíope gets the notes on every change.
+- **Another demo:** `DEMO_URL`, or ask "Calíope, open the page ..." with the address. The free tools (`click`, `fill`,
+  `select`, `read_screen`) find elements by label or visible text.
+- **Reliable script:** for the most important part of the demo, write a function in `stage.mjs` like
+  `scriptOpenAccount` and register its name in `run_script` (`agent.mjs`). Free requests are for improvising.
+- **`oc` commands and APIs:** add them as a new server tool, with an allowlist of commands.
+- **A scene result on the slide:** another program on this machine can `POST /api/stage/cena` with
+  `{id, titulo, onde, estado, linhas}`; if the deck exposes `window.deck.cena`, the result shows over the current slide.
+  This is how the demo console shows the cluster's 403 and 429 (`docs/agents-in-practice.md`, section 4.5).
 
-## Custos
+## Costs
 
-Com `gpt-realtime-2.1`, 1 hora ao vivo custa até cerca de US$ 6,60; com `gpt-realtime-2.1-mini`, cerca de US$ 3.
-Use o mini (`REALTIME_MODEL=gpt-realtime-2.1-mini`) nos ensaios.
+With `gpt-realtime-2.1`, 1 hour live costs up to about US$ 6.60; with `gpt-realtime-2.1-mini`, about US$ 3.
+Use mini (`REALTIME_MODEL=gpt-realtime-2.1-mini`) in rehearsals.

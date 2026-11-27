@@ -1,13 +1,13 @@
 {
-  "name": "copiloto-voz",
+  "name": "caliope-co-presenter",
   "version": "0.1.0",
   "private": true,
-  "description": "Co-apresentadora de voz para apresentações ao vivo: troca slides e opera demos web como um usuário.",
+  "description": "Voice co-presenter for live talks: changes slides and runs web demos like a user.",
   "type": "module",
   "scripts": {
     "start": "node server.mjs",
     "setup": "npm install && npx playwright install chromium",
-    "test": "node test/e2e.mjs && node test/guia.mjs"
+    "test": "node test/language.mjs && node test/e2e.mjs && node test/guide.mjs"
   },
   "engines": { "node": ">=20" },
   "dependencies": { "playwright": "^1.48.0" }
